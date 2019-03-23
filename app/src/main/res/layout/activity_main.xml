@@ -7,9 +7,12 @@
     tools:context=".MainActivity"
     android:background="#254F6E">
 
-    <include
+    <com.example.runtrack.TitleLayout
         android:id="@+id/incTile"
-        layout="@layout/layout_title" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
     <com.amap.api.maps2d.MapView
         android:id="@+id/amap"
@@ -48,11 +51,11 @@
 
         <Button
             android:id="@+id/btnStart"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:text="Run"
             android:background="@drawable/btn_circle"
-            android:textSize="30dp"
+            android:textSize="20dp"
             android:textColor="#254F6E"
             android:onClick="btnStart"
             app:layout_constraintLeft_toLeftOf="parent"

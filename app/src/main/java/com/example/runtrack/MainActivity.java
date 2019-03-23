@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
 
     private TextView tv_Time;
     private TextView tv_Distance;
+    private TextView tv_Speed;
 
 
     @Override
@@ -79,6 +80,9 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
         setUpMap();
         tv_Time = (TextView) findViewById(R.id.time);
         tv_Distance = (TextView) findViewById(R.id.dist);
+        tv_Speed = (TextView) findViewById(R.id.speed);
+        Button back = (Button)findViewById(R.id.back);
+        back.setVisibility(View.INVISIBLE);
         mHandler.postDelayed(TimerRunnable, 1000);
     }
 
@@ -105,7 +109,11 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
                 time++;
                 tv_Time.setText(timer.secToTime(time));
                 DecimalFormat df=new DecimalFormat("00.00");
-                tv_Distance.setText(String.valueOf(df.format(distance)));
+                double dis = distance/1000.0;
+                double speed = 0;
+                if(dis != 0) speed = (((double) timer.getTime())/60.0)/dis;
+                tv_Distance.setText(String.valueOf(df.format(dis)));
+                tv_Speed.setText(String.valueOf(df.format(speed)));
             }
             mHandler.postDelayed(this, 1000);
         }

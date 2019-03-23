@@ -34,13 +34,19 @@
 
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="" />
+            android:value="787465a64f89486d47f3d2300aeb42a2" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".RecordLog">
+            <intent-filter>
+                <action android:name="com.example.runtrack.ACTION_START" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
