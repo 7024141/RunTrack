@@ -1,9 +1,13 @@
 package com.example.runtrack;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.icu.util.TimeUnit;
 import android.location.Location;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +34,10 @@ import com.amap.api.maps2d.model.MyLocationStyle;
 import com.amap.api.maps2d.model.PolylineOptions;
 import com.amap.api.maps2d.model.Text;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,6 +75,7 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
         if(actionBar != null)
             actionBar.hide();
 
+
         //获取地图控件引用
         mapView = (MapView) findViewById(R.id.amap);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
@@ -77,29 +86,64 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
             aMap.setMapLanguage(AMap.ENGLISH);
             aMap.moveCamera(CameraUpdateFactory.zoomTo(20));
         }
+
         setUpMap();
+
         tv_Time = (TextView) findViewById(R.id.time);
         tv_Distance = (TextView) findViewById(R.id.dist);
         tv_Speed = (TextView) findViewById(R.id.speed);
         Button back = (Button)findViewById(R.id.back);
         back.setVisibility(View.INVISIBLE);
         mHandler.postDelayed(TimerRunnable, 1000);
+
     }
 
     public void btnStart(View v){
         Button btnRun = (Button)findViewById(R.id.btnStart);
-        if(!isRun){
+        boolean internetFlag = false;
+        internetFlag = IsNetConnect.isNetworkAvalible(this);
+
+        if((!isRun) && internetFlag){
             isRun = true;
             btnRun.setBackgroundResource(R.drawable.btn_circle_pressed);
             btnRun.setText("Stop"); btnRun.setTextColor(Color.parseColor("#ffffff"));
             timer.setStart(true);
         }
-        else {
+        else if(internetFlag){
             isRun = false;
             btnRun.setBackgroundResource(R.drawable.btn_circle);
             btnRun.setText("Run"); btnRun.setTextColor(Color.parseColor("#254F6E"));
             timer.setStart(false);
+            transmitPage();
         }
+        else{
+            Toast.makeText(MainActivity.this,
+                    "Internet is Unavaliable\n      Loaction failed!",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void transmitPage(){
+        DateFormat fm = new SimpleDateFormat("MM/dd/yyyy");
+        String strDate = fm.format(new Date());
+        String picPath = mapScreenShot.aMapScreenShot(aMap);
+
+        Intent intent = new Intent("com.example.runtrack.ACTION_START");
+
+        intent.putExtra("type", 1);
+        intent.putExtra("time", time);
+        intent.putExtra("distance", distance);
+        intent.putExtra("strDate", strDate);
+        intent.putExtra("picPath", picPath);
+
+        startActivity(intent);
+
+        time = 0;
+        tv_Time.setText(timer.secToTime(time));
+        tv_Distance.setText("00.00");
+        tv_Speed.setText("00.00");
+        distance = 0.0;
+        aMap.clear();
     }
 
     private Runnable TimerRunnable = new Runnable() {
@@ -111,7 +155,7 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
                 DecimalFormat df=new DecimalFormat("00.00");
                 double dis = distance/1000.0;
                 double speed = 0;
-                if(dis != 0) speed = (((double) timer.getTime())/60.0)/dis;
+                if(dis > 0.01) speed = (((double) timer.getTime())/60.0)/dis;
                 tv_Distance.setText(String.valueOf(df.format(dis)));
                 tv_Speed.setText(String.valueOf(df.format(speed)));
             }
@@ -120,6 +164,11 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
     };
 
     private void setUpMap() {
+        if(!IsNetConnect.isNetworkAvalible(this)) {
+            Toast.makeText(MainActivity.this,
+                    "Internet is Unavaliable\n      Loaction failed!",
+                    Toast.LENGTH_LONG).show();
+        }
         /**         * 设置一些amap的属性         */
         UiSettings uiSettings = aMap.getUiSettings();
         uiSettings.setZoomControlsEnabled(true);// 设置缩放按钮是否显示
@@ -127,7 +176,7 @@ public class MainActivity extends AppCompatActivity //implements LocationSource,
         uiSettings.setMyLocationButtonEnabled(false);// 设置默认定位按钮是否显示
         /** 自定义系统定位小蓝点         *         */
         MyLocationStyle myLocationStyle = new MyLocationStyle();
-        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER);
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW);
         myLocationStyle.strokeColor(Color.argb(0, 0, 0, 0));// 自定义精度范围的圆形边框颜色
         myLocationStyle.radiusFillColor(Color.argb(0, 0, 0, 0));//圆圈的颜色,设为透明的时候就可以去掉园区区域了
 

@@ -24,6 +24,7 @@ public class TitleLayout extends LinearLayout {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), RecordLog.class);
+                intent.putExtra("type", 0);
                 getContext().startActivity(intent);
             }
         });

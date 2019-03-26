@@ -59,7 +59,7 @@ public class Timer{
         return strTime;
     }
 
-    public String unitFormat(int i) {
+    private String unitFormat(int i) {
         String retStr = null;
         if (i >= 0 && i < 10)
             retStr = "0" + Integer.toString(i);
